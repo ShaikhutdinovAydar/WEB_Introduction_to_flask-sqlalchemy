@@ -1,27 +1,23 @@
-from flask import Flask
+from flask import Flask, render_template
 from data import db_session
 
+from WEB_SQLACHEMY.data.db_session import global_init, create_session
+from WEB_SQLACHEMY.data.jobs import Jobs
 from WEB_SQLACHEMY.data.users import User
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
-def main():
-    db_session.global_init("db/ mars_explorer.db")
-    user = User()
-    user.surname = 'Scott'
-    user.name = "Ridley"
-    user.age = 21
-    user.position = "captain"
-    user.speciality = "research engineer"
-    user.address = "module_1"
-    user.email = "scott_chief@mars.org"
-    session = db_session.create_session()
-    session.add(user)
-    session.commit()
-    app.run()
+@app.route("/")
+def g():
+    global_init(f"db/mars_explorer.db")
+    session = create_session()
+    listt = []
+    for user in session.query(Jobs):
+        listt.append(user)
+    return render_template('index.html', listt=listt)
 
 
 if __name__ == '__main__':
-    main()
+    app.run(port=8080, host='127.0.0.1')
